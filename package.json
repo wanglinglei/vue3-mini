@@ -1,0 +1,20 @@
+{
+  "name": "vue3-mini",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/wanglinglei/vue3-mini.git",
+  "license": "MIT",
+  "scripts": {
+    "prepare": "husky install",
+    "commitlint": "commitlint --config commitlint.config.js -e -V"
+  },
+  "lint-staged": {},
+  "dependencies": {
+    "@commitlint/cli": "^17.0.3",
+    "@commitlint/config-conventional": "^17.0.3"
+  },
+  "devDependencies": {
+    "husky": "^8.0.3",
+    "lint-staged": "^13.1.0"
+  }
+}
