@@ -11,8 +11,9 @@
   "license": "MIT",
   "scripts": {
     "build": "node scripts/build.js",
+    "dev": "node scripts/dev.js",
     "prepare": "husky install",
-    "commitlint": "commitlint --config commitlint.config.js -e -V"
+    "commitlint": "commitlint --config commitlint.config.cjs -e -V"
   },
   "lint-staged": {},
   "dependencies": {
