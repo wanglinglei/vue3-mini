@@ -1,1 +1,3 @@
 node_modules/
+// 忽略打包文件
+packages/*/dist/*  

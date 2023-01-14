@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "target": "ESNext",
+    "module": "ESNext",
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "strict": true,
+    "skipLibCheck": false,
+    "moduleResolution": "node",
+    "rootDir": ".",
+    "paths": {
+      "@vue/*":["packages/*/src"]
+    }
+}
+}
