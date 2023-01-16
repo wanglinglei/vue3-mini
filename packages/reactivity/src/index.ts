@@ -1,3 +1,6 @@
-function log1() {
-  console.log('reactivity');
+import { reactive, readOnly, readOnlyShallow, reactiveShallow } from './reactivity'
+
+
+export {
+  reactive, readOnly, readOnlyShallow, reactiveShallow
 }
