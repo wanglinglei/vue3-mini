@@ -36,7 +36,19 @@ export function track(target: object, key: TKey) {
  * @param {TKey} key
  * @return {*}
  */
-export function trigger(target: object, key: TKey) {}
+export function trigger(target: object, key: TKey) {
+  let depMap = targetMap.get(target);
+  if (!depMap) {
+    return;
+  }
+  let dep = depMap.get(key);
+  if (!dep) {
+    return;
+  }
+  dep.forEach((effect) => {
+    effect();
+  });
+}
 
 // 副作用函数栈 用以解决副作用函数嵌套问题
 //  effect(()=>{
