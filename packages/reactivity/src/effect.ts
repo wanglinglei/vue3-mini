@@ -1,5 +1,13 @@
-import { TEffect, IEffectOptions, TKey, TDepMap } from "./type";
-
+import { isArray, isIntegerKey } from "@vue/shared";
+import {
+  TEffect,
+  IEffectOptions,
+  TKey,
+  TDepMap,
+  TTriggerType,
+  TDep,
+} from "./type";
+import { TrackType, TriggerType } from "./operationType";
 // 当前激活的副作用函数
 let activeEffect: undefined | TEffect;
 
@@ -36,16 +44,56 @@ export function track(target: object, key: TKey) {
  * @param {TKey} key
  * @return {*}
  */
-export function trigger(target: object, key: TKey) {
+export function trigger(
+  target: object,
+  key: TKey,
+  type: TTriggerType,
+  oldValue: any,
+  newValue: any
+) {
   let depMap = targetMap.get(target);
   if (!depMap) {
     return;
   }
-  let dep = depMap.get(key);
-  if (!dep) {
-    return;
+
+  // 解决副作用函数重复调用问题 定义Set结构
+  let effectSet: TDep = new Set();
+  const add = (effects: TDep | undefined) => {
+    if (effects) {
+      effects.forEach((effect) => {
+        effectSet.add(effect);
+      });
+    }
+  };
+  add(depMap.get(key));
+
+  // 处理数组 修改数组length
+  if (key === "length" && isArray(target)) {
+    depMap.forEach((effects, key) => {
+      // 修改的length小于当前length  取出被删掉的元素对应的effect 执行
+      if (key === "length" && key >= newValue) {
+        add(effects);
+      }
+    });
+  } else {
+    // 对象
+    if (key !== undefined) {
+      add(depMap.get(key));
+    } else {
+      // 判断具体操作类型
+      switch (type) {
+        case TriggerType.ADD:
+          if (isArray(target) && isIntegerKey(key)) {
+            add(depMap.get("length"));
+          }
+          break;
+
+        default:
+          break;
+      }
+    }
   }
-  dep.forEach((effect) => {
+  effectSet.forEach((effect) => {
     effect();
   });
 }

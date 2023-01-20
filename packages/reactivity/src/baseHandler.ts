@@ -1,5 +1,11 @@
-import { isObject, isArray } from "@vue/shared";
-import { TrackType, TriggerType } from "./operatonType";
+import {
+  isObject,
+  isArray,
+  isIntegerKey,
+  hasOwn,
+  isEqualValue,
+} from "@vue/shared";
+import { TrackType, TriggerType } from "./operationType";
 import { reactive, readOnly } from "./reactivity";
 import { track, trigger } from "./effect";
 
@@ -26,10 +32,26 @@ function createGetter(isReadOnly: boolean = false, isShallow: boolean = false) {
 function createSetter(isShallow: boolean = false) {
   return function set(target: object, key: string | symbol, receiver: object) {
     const oldVal = (target as any)[key];
-    const newVal = Reflect.set(target, key, receiver);
-    let kadKey;
+    // 1.判断是数组还是对象   2.类型 添加or修改
+    let hadKey;
     if (isArray(target)) {
+      if (isIntegerKey(key)) {
+        hadKey = Number(key) < (target as []).length;
+      }
+    } else {
+      hadKey = hasOwn(target, key);
     }
+    const newVal = Reflect.set(target, key, receiver);
+
+    if (!hadKey) {
+      // 新增
+    } else {
+      // 修改 比较新旧值是否相等
+      if (!isEqualValue(oldVal, newVal)) {
+        trigger(target, key, TriggerType.ADD, oldVal, newVal);
+      }
+    }
+
     return newVal;
   };
 }

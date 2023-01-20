@@ -17,4 +17,16 @@ export function isObject(val: unknown): boolean {
 export function isEqualValue(val1: unknown, val2: unknown): boolean {
   return val1 === val2;
 }
-export const hasOwn = Object.prototype.hasOwnProperty;
+export const hasOwnProperty = Object.prototype.hasOwnProperty;
+export function hasOwn(target: object, key: any) {
+  return hasOwnProperty.call(target, key);
+}
+// 判断key 是否为整数
+export function isIntegerKey(key: unknown): boolean {
+  return (
+    isString(key) &&
+    key !== "NaN" &&
+    key[0] !== "-" &&
+    "" + parseInt(key, 10) === key
+  );
+}
