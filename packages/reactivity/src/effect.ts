@@ -6,6 +6,7 @@ import {
   TDepMap,
   TTriggerType,
   TDep,
+  TVoid,
 } from "./type";
 import { TrackType, TriggerType } from "./operationType";
 // 当前激活的副作用函数
@@ -48,7 +49,6 @@ export function trigger(
   target: object,
   key: TKey,
   type: TTriggerType,
-  oldValue: any,
   newValue: any
 ) {
   let depMap = targetMap.get(target);
@@ -111,11 +111,11 @@ let effectStack: TEffect[] = [];
 
 /**
  * @description:
- * @param {void} fn
+ * @param {TVoid} fn
  * @param {IEffectOptions} options
  * @return {*}
  */
-function effect(fn: void, options: IEffectOptions = {}) {
+export function effect(fn: TVoid, options: IEffectOptions = {}) {
   const effect = createEffect(fn, options);
   if (!options.lazy) {
     effect();
@@ -123,12 +123,13 @@ function effect(fn: void, options: IEffectOptions = {}) {
   return effect;
 }
 
-function createEffect(fn: void, options: IEffectOptions = {}): TEffect {
+function createEffect(fn: TVoid, options: IEffectOptions = {}): TEffect {
   const effect = function reactiveEffect() {
     if (!effectStack.includes(effect)) {
       try {
         activeEffect = effect;
         effectStack.push(effect);
+        fn();
       } finally {
         effectStack.pop();
         activeEffect = effectStack[effectStack.length - 1];

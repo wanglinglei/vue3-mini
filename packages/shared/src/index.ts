@@ -22,7 +22,7 @@ export function hasOwn(target: object, key: any) {
   return hasOwnProperty.call(target, key);
 }
 // 判断key 是否为整数
-export function isIntegerKey(key: unknown): boolean {
+export function isIntegerKey(key: string): boolean {
   return (
     isString(key) &&
     key !== "NaN" &&

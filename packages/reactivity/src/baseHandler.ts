@@ -30,7 +30,7 @@ function createGetter(isReadOnly: boolean = false, isShallow: boolean = false) {
 }
 
 function createSetter(isShallow: boolean = false) {
-  return function set(target: object, key: string | symbol, receiver: object) {
+  return function set(target: object, key: string, receiver: object) {
     const oldVal = (target as any)[key];
     // 1.判断是数组还是对象   2.类型 添加or修改
     let hadKey;
@@ -48,7 +48,7 @@ function createSetter(isShallow: boolean = false) {
     } else {
       // 修改 比较新旧值是否相等
       if (!isEqualValue(oldVal, newVal)) {
-        trigger(target, key, TriggerType.ADD, oldVal, newVal);
+        trigger(target, key, TriggerType.ADD, newVal);
       }
     }
 
