@@ -1,16 +1,16 @@
-export function isArray(val: unknown): boolean {
+export function isArray(val: unknown): val is [] {
   return Array.isArray(val);
 }
 
-export function isNumber(val: unknown): boolean {
+export function isNumber(val: unknown): val is number {
   return typeof val === "number";
 }
 
-export function isString(val: unknown): boolean {
+export function isString(val: unknown): val is string {
   return typeof val === "string";
 }
 
-export function isObject(val: unknown): boolean {
+export function isObject(val: unknown): val is object {
   return typeof val === "object";
 }
 
@@ -22,7 +22,7 @@ export function hasOwn(target: object, key: any) {
   return hasOwnProperty.call(target, key);
 }
 // 判断key 是否为整数
-export function isIntegerKey(key: string): boolean {
+export function isIntegerKey(key: unknown): boolean {
   return (
     isString(key) &&
     key !== "NaN" &&
