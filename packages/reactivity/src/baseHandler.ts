@@ -30,7 +30,12 @@ function createGetter(isReadOnly: boolean = false, isShallow: boolean = false) {
 }
 
 function createSetter(isShallow: boolean = false) {
-  return function set(target: object, key: string, receiver: object) {
+  return function set(
+    target: object,
+    key: string,
+    newValue: any,
+    receiver: object
+  ) {
     const oldVal = (target as any)[key];
     // 1.判断是数组还是对象   2.类型 添加or修改
     let hadKey;
@@ -41,18 +46,19 @@ function createSetter(isShallow: boolean = false) {
     } else {
       hadKey = hasOwn(target, key);
     }
-    const newVal = Reflect.set(target, key, receiver);
-
+    const res = Reflect.set(target, key, newValue, receiver);
+    if (!res) return;
     if (!hadKey) {
       // 新增
+      trigger(target, key, TriggerType.ADD, newValue);
     } else {
       // 修改 比较新旧值是否相等
-      if (!isEqualValue(oldVal, newVal)) {
-        trigger(target, key, TriggerType.ADD, newVal);
+      if (!isEqualValue(oldVal, newValue)) {
+        trigger(target, key, TriggerType.SET, newValue);
       }
     }
 
-    return newVal;
+    return newValue;
   };
 }
 
