@@ -1,16 +1,16 @@
 import { isArray, isIntegerKey } from "@vue/shared";
 import {
-  TEffect,
   IEffectOptions,
   TKey,
   TDepMap,
   TTriggerType,
   TDep,
   TVoid,
+  IEffectAndOPt,
 } from "./type";
 import { TrackType, TriggerType } from "./operationType";
 // 当前激活的副作用函数
-let activeEffect: undefined | TEffect;
+let activeEffect: undefined | TVoid;
 
 // 副作用函数存储桶
 //  targetMap  -> WeakMap
@@ -94,7 +94,12 @@ export function trigger(
     }
   }
   effectSet.forEach((effect) => {
-    effect();
+    // 触发更新时配置项中如果有需要调度的方法 执行 比如 计算属性 在设置新值时 重置_dirty状态 以计算新值
+    if (effect.options?.schedule) {
+      effect.options.schedule();
+    } else {
+      effect();
+    }
   });
 }
 
@@ -107,7 +112,7 @@ export function trigger(
 //    obj.c             effect1
 // })
 
-let effectStack: TEffect[] = [];
+let effectStack: TVoid[] = [];
 
 /**
  * @description:
@@ -123,21 +128,22 @@ export function effect(fn: TVoid, options: IEffectOptions = {}) {
   return effect;
 }
 
-function createEffect(fn: TVoid, options: IEffectOptions = {}): TEffect {
-  const effect = function reactiveEffect() {
+function createEffect(fn: TVoid, options: IEffectOptions = {}): IEffectAndOPt {
+  let effect = function reactiveEffect() {
     if (!effectStack.includes(effect)) {
       try {
         activeEffect = effect;
         effectStack.push(effect);
-        fn();
+        return fn();
       } finally {
         effectStack.pop();
         activeEffect = effectStack[effectStack.length - 1];
       }
     }
   };
-  effect._isEffect = true;
-  effect.options = options;
-  effect.raw = fn;
-  return effect;
+  const _effect: IEffectAndOPt = effect;
+  _effect._isEffect = true;
+  _effect.options = options;
+  _effect.raw = fn;
+  return _effect;
 }

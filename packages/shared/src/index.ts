@@ -14,6 +14,10 @@ export function isObject(val: unknown): val is object {
   return typeof val === "object";
 }
 
+export function isFunction(val: unknown): val is Function {
+  return typeof val === "function";
+}
+
 export function isEqualValue(val1: unknown, val2: unknown): boolean {
   return val1 === val2;
 }
