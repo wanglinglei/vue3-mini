@@ -11,7 +11,7 @@ export const nodeOps = {
     parent && parent.removeChild(child);
   },
   // 插入节点  anchor 插入锚点 不传直接追加
-  insert: (child: Element, parent: Element, anchor = null) => {
+  insert: (child: Element, parent: Element, anchor: Element | null = null) => {
     parent && parent.insertBefore(child, anchor);
   },
   // 查找节点

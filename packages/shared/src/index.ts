@@ -1,3 +1,5 @@
+export { ShapeFlags } from "./shapeFlags";
+
 export function isArray(val: unknown): val is [] {
   return Array.isArray(val);
 }
