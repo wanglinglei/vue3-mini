@@ -11,17 +11,19 @@
   - [渲染器](#%E6%B8%B2%E6%9F%93%E5%99%A8)
     - [description](#description-1)
     - [runtime-dom](#runtime-dom)
+      - [description](#description-2)
     - [runtime-core](#runtime-core)
+      - [description](#description-3)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 
-## Vue3-mini 
+# Vue3-mini 
 ***
-### description
+## description
 参考Vue3源码，实现最简Vue3模型
 
-### 项目目录
+## 项目目录
 
 > vue3-mini
 >>--packages  各模块包
@@ -41,12 +43,12 @@
 >
 >>-- rollup.config  rollup 打包配置
 
-### reactive 响应式
+## reactive 响应式
 
-#### vue2与vue3响应式的区别
+### vue2与vue3响应式的区别
 vue2实现响应式是通过Object.defineProperty来劫持对象中的每一个属性的set、get,而vue3 是通过Proxy创建代理对象,来拦截所有对象的操作。vue3相对于vue2来说性能更高,vue3中的响应式是懒响应,只有对象中被访问的属性才会被依赖收集;而vue2中是递归遍历对象中所有属性,为其创建watcher实例,以监听数据的变化。
 
-#### 核心逻辑
+### 核心逻辑
 1. 代理对象
   ```javascript
   const data=new Proxy(obj,{
@@ -102,11 +104,14 @@ function trigger(target,key){
 }
 ```
 
-### 渲染器
-#### description  
+## 渲染器
+### description  
 Vue3整个渲染器 分为两个模块:runtime-dom(浏览器运行时)和runtime-core(核心运行时).其中runtime-dom中主要是针对于浏览器平台的dom相关的操作方法;runtime-core 是核心渲染方法,其在创建渲染器时需要接收dom相关的操作方法,正因如此通过runtime-core可以很容易实现跨平台,我们只需要为其提供不同平台的dom操作方法.
 
-#### runtime-dom
+### runtime-dom
+#### description
+主要为runtime-code 提供在浏览器平台的dom操作方法
 
-
-#### runtime-core
+### runtime-core
+#### description 
+核心渲染方法
