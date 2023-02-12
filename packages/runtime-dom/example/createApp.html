@@ -12,10 +12,18 @@
 </body>
 <script src="../dist//runtime-dom.global.js"></script>
 <script>
-  const {createApp} =VueRuntimeDOM;
+  const {createApp,h} =VueRuntimeDOM;
   let App={
-    render(){
-      console.log('render',100);
+    setup(props,context){
+      console.log('example-setup',props,context);
+      // return ()=>{
+      //   console.log('example-setup-render');
+      // }
+    },
+    render(proxy){
+      // console.log('example-render',proxy,this);
+      // return  h('div',{style:{color:'red'}},'hello world')
+      return h('div',{style:{color:'red'}},['hello world'])
     }
   }
   createApp(App,{name:"document",age:0001}).mount("#app")

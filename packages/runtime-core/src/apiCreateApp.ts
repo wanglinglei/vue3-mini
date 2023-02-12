@@ -13,7 +13,9 @@ export function createAppApi(render: TRender) {
       _props: rootProps,
       _container: null,
       mount(container: Element) {
+        // 创建虚拟dom
         let vnode = createVnode(rootComponent, rootProps);
+        // render the vnode
         render(vnode, container);
         //@ts-ignore
         app._container = container;

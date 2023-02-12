@@ -2,7 +2,7 @@
 
 export const nodeOps = {
   // 创建dom节点
-  createElement: (tagName: string): Element => {
+  createElement: (tagName: string): HTMLElement => {
     return document.createElement(tagName);
   },
   // 移除节点
@@ -11,7 +11,11 @@ export const nodeOps = {
     parent && parent.removeChild(child);
   },
   // 插入节点  anchor 插入锚点 不传直接追加
-  insert: (child: Element, parent: Element, anchor: Element | null = null) => {
+  insert: (
+    child: Element | Node,
+    parent: Element,
+    anchor: Element | null = null
+  ) => {
     parent && parent.insertBefore(child, anchor);
   },
   // 查找节点
@@ -29,5 +33,10 @@ export const nodeOps = {
   // 设置文本节点值
   setText: (node: { nodeValue: any }, text: any) => {
     node.nodeValue = text;
+  },
+
+  // 父节点
+  parentNode: (child: Element) => {
+    return child.parentNode;
   },
 };

@@ -1,13 +1,14 @@
 // runtime 浏览器运行时 操作dom   1.节点  2.属性
-import { createRender } from "@vue/runtime-core";
+import { createRender, h } from "@vue/runtime-core";
 import { nodeOps } from "./nodeOps";
 import { patchProps } from "./patchProps";
 
 const renderOptionDOM = { ...nodeOps, patchProps };
-
+export { h };
 export { renderOptionDOM };
 
 export function createApp(rootComponent: any, rootPros: {}) {
+  //  跨平台 传入不同的\平台的渲染方法
   let app = createRender(renderOptionDOM).createApp(rootComponent, rootPros);
   let { mount } = app;
   // @ts-ignore
