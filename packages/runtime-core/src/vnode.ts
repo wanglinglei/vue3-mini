@@ -1,5 +1,5 @@
 // 创建虚拟dom 和 h() 函数作用一样  需要区分是元素还是组件
-import { IVnode } from "./types";
+import { IVnode, TPatchN } from "./types";
 
 import { isString, ShapeFlags, isObject, isArray } from "@vue/shared";
 
@@ -71,4 +71,9 @@ export function CVnode(child: string | IVnode): IVnode {
     return child;
   }
   return createVnode(TEXT, null, String(child));
+}
+
+export function isSameNode(n1: IVnode, n2: TPatchN): boolean {
+  if (n2 === null) return false;
+  return n1.type == n2.type && n1.key == n2.key;
 }

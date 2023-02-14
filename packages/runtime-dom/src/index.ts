@@ -22,3 +22,5 @@ export function createApp(rootComponent: any, rootPros: {}) {
   };
   return app;
 }
+
+export { reactive } from "@vue/reactivity";

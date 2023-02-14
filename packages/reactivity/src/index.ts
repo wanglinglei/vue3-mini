@@ -7,6 +7,8 @@ export {
 
 export { ref, toRef, toRefs } from "./ref";
 
-export { effect } from "./effect";
+export { effect, track, trigger } from "./effect";
 
 export { computed } from "./computed";
+
+export { TriggerType } from "./operationType";

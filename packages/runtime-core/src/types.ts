@@ -46,6 +46,7 @@ export interface IInstanceCtx {
 }
 export interface IComponentInstance {
   vnode: IVnode;
+  subTree: TPatchN;
   props: Record<string, any>; // 组件的属性
   attrs: Record<string, any>; // attrs
   setupState: Record<string, any>;
@@ -57,7 +58,9 @@ export interface IComponentInstance {
   slots?: any[];
   emit?: () => void;
   expose?: () => void;
-  render?: (ctx: any) => void;
+  render?: (ctx: any) => IVnode;
 }
 
 export type TPatchN = null | IVnode;
+
+export type TElementProps = Record<string, any>;

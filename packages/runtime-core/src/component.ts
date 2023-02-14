@@ -11,6 +11,7 @@ import { idText } from "typescript";
 export function createComponentInstance(vnode: IVnode): IComponentInstance {
   const instance: IComponentInstance = {
     vnode,
+    subTree: null,
     type: vnode.type,
     props: {}, // 组件的属性
     attrs: {}, // attrs
