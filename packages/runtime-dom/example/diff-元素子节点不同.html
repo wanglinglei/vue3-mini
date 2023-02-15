@@ -14,22 +14,21 @@
 <script src="../../reactivity//dist//reactivity.global.js"></script>
 <script>
   const {createApp,h,reactive} =VueRuntimeDOM;
-  // const {reactive,effect}=VueReactivity
   let App={
     setup(props,context){
       const state=reactive({name:'example',flag:false})
       setTimeout(()=>{
         state.flag=true
-        state.name='example==='
         console.log('setup-state',state);
       },5000)
       return {state}
     },
     render(proxy){
       if(proxy.state.flag){
-        return h('div',{style:{color:'red'}},[proxy.state.name])
+        // return h('div',{style:{color:'red'}},['flag===true'])
+        return h('div',{style:{color:'red'}},[h('h3',{style:{color:'green'}},'flag===true')])
       }else{
-        return h('div',{style:{color:'blue'}},[proxy.state.name])
+        return h('div',{style:{color:'blue'}},'flag===false')
       }
       
     }

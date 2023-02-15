@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+
+  <body>
+    <div id="app"></div>
+  </body>
+  <script src="../dist//runtime-dom.global.js"></script>
+  <script src="../../reactivity//dist//reactivity.global.js"></script>
+  <script>
+    const { createApp, h, reactive } = VueRuntimeDOM;
+    let App = {
+      setup(props, context) {
+        const state = reactive({ name: "example", flag: false });
+        setTimeout(() => {
+          state.flag = true;
+          console.log("setup-state", state);
+        }, 5000);
+        return { state };
+      },
+      render(proxy) {
+        if (proxy.state.flag) {
+          // return h('div',{style:{color:'red'}},['flag===true'])
+          return h("div", { style: { color: "red" } }, [
+            h("p", { style: { color: "green" }, key: "f" }, "h3-f"),
+            h("p", { style: { color: "green" }, key: "g" }, "h3-g"),
+            h("p", { style: { color: "green" }, key: "a" }, "h3-a"),
+            h("p", { style: { color: "green" }, key: "b" }, "h3-b"),
+            h("p", { style: { color: "green" }, key: "e" }, "h3-e"),
+            h("p", { style: { color: "green" }, key: "c" }, "h3-c"),
+            h("p", { style: { color: "green" }, key: "d" }, "h3-d"),
+          ]);
+        } else {
+          return h("div", { style: { color: "blue" } }, [
+            h("p", { style: { color: "green" }, key: "a" }, "h3-a"),
+            h("p", { style: { color: "green" }, key: "b" }, "h3-b"),
+            h("p", { style: { color: "green" }, key: "c" }, "h3-c"),
+            h("p", { style: { color: "green" }, key: "d" }, "h3-d"),
+          ]);
+        }
+      },
+    };
+    createApp(App, { name: "document", age: 0001 }).mount("#app");
+  </script>
+</html>
