@@ -14,6 +14,10 @@
       - [description](#description-2)
     - [runtime-core](#runtime-core)
       - [description](#description-3)
+      - [组件的渲染流程](#%E7%BB%84%E4%BB%B6%E7%9A%84%E6%B8%B2%E6%9F%93%E6%B5%81%E7%A8%8B)
+        - [1.创建组件的实例对象](#1%E5%88%9B%E5%BB%BA%E7%BB%84%E4%BB%B6%E7%9A%84%E5%AE%9E%E4%BE%8B%E5%AF%B9%E8%B1%A1)
+        - [2.解析数据到实例对象](#2%E8%A7%A3%E6%9E%90%E6%95%B0%E6%8D%AE%E5%88%B0%E5%AE%9E%E4%BE%8B%E5%AF%B9%E8%B1%A1)
+        - [3.创建组件渲染的effect](#3%E5%88%9B%E5%BB%BA%E7%BB%84%E4%BB%B6%E6%B8%B2%E6%9F%93%E7%9A%84effect)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -114,4 +118,142 @@ Vue3整个渲染器 分为两个模块:runtime-dom(浏览器运行时)和runtime
 
 ### runtime-core
 #### description 
-核心渲染方法
+核心渲染方法  patch 比对新旧节点 把虚拟dom  转化真实dom 
+```javascript
+  const patch = (n1,n2,container,anchor) => {
+    // 判断是否是同一个元素 1:不是替换  2. 是 比对属性 子节点等
+    if (n1 && !isSameNode(n1, n2)) {
+      unmount(n1);
+      n1 = null;
+    }
+    if (n2 === null) return;
+    let { shapeFlag, type } = n2;
+    switch (type) {
+      // 文本
+      case TEXT:
+        processText(n1, n2, container);
+        break;
+      default:
+        if (shapeFlag & ShapeFlags.ELEMENT) {
+          // 是元素
+          processElement(n1, n2, container, anchor);
+        } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
+          // 组件
+          processComponent(n1, n2, container);
+        }
+    }
+  };
+```
+文本处理方法processText和元素处理方法processElement 逻辑较为简单,可以直接参考源码.
+主要梳理一下组件的渲染的方法.
+#### 组件的渲染流程
+##### 1.创建组件的实例对象
+
+```javascript
+  function createComponentInstance(vnode) {
+    const instance = {
+      vnode,
+      subTree: null,
+      type: vnode.type,
+      props: {}, // 组件的属性
+      attrs: {}, // attrs
+      setupState: {},
+      ctx: { _: undefined }, //处理代理
+      proxy: {},
+      isMounted: false, // 是否挂载过,
+      children: [],
+    };
+    instance.ctx = { _: instance };
+    return instance;
+  }
+```
+
+##### 2.解析数据到实例对象
+```javascript
+  function setupComponent(instance) {
+    const { props, children } = instance.vnode;
+    instance.props = props;
+    instance.children = children;
+    // 是否是有状态的组件 setup
+    let shapeFlag = instance.vnode.shapeFlag & ShapeFlags.STATEFUL_COMPONENT;
+    if (shapeFlag) {
+      // 有状态组件
+      setupStateComponent(instance);
+    }
+  }
+
+  function setupStateComponent(instance) {
+    instance.proxy = new Proxy(instance.ctx, componentPublicInstance);
+
+    // 获取组件的类型 拿到组件setup方法
+    let Component = instance.type;
+    let { setup, render } = Component;
+
+    if (setup) {
+      let setupContext = createContext(instance);
+      let setupResult = setup(instance.props, setupContext);
+      handleSetupResult(instance, setupResult);
+      componentRender(instance);
+    }
+  }
+
+  function createContext(instance) {
+    return {
+      attrs: instance.attrs,
+      slots: instance.slots,
+      emit: () => {},
+      expose: () => {},
+    };
+  }
+
+  // setup 返回值两种情况 返回的render函数 保存到组件实例;是对象则合并到组件state
+  function handleSetupResult(instance, setupResult) {
+    if (isFunction(setupResult)) {
+      // 如果setup 返回的render函数 保存到组件实例
+      instance.render = setupResult;
+    } else if (isObject(setupResult)) {
+      instance.setupState = setupResult;
+    }
+  }
+
+  function componentRender(instance: IComponentInstance) {
+    let Component = instance.type;
+    if (!instance.render) {
+      if (!Component.render && Component.template) {
+        //todo : template compare
+      }
+      instance.render = Component.render;
+    }
+  } 
+```
+
+##### 3.创建组件渲染的effect
+```javascript
+  const setupComponentEffect = (instance,container) => {
+    // 创建effect
+    effect(function componentEffect() {
+      if (!instance.isMounted) {
+        // 获取到render 返回值
+        let proxy = instance.proxy;
+
+        //执行render 创建渲染节点
+        const subTree = (instance.subTree = instance.render?.call(
+          proxy,
+          proxy
+        ));
+        patch(null, subTree, container);
+        instance.isMounted = true;
+      } else {
+        // 组件更新
+        let proxy = instance.proxy;
+        const preTree = instance.subTree;
+
+        const nextTree = instance.render
+          ? instance.render.call(proxy, proxy)
+          : null;
+        patch(preTree, nextTree, container);
+      }
+    });
+  };
+
+```
