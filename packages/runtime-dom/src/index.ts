@@ -23,4 +23,14 @@ export function createApp(rootComponent: any, rootPros: {}) {
   return app;
 }
 
+//////
+// 调试导出
+
 export { reactive } from "@vue/reactivity";
+
+export {
+  onBeforeMount,
+  onMounted,
+  onBeforeUpdate,
+  onUpdated,
+} from "@vue/runtime-core";

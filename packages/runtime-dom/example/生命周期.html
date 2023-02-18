@@ -13,7 +13,8 @@
   <script src="../dist//runtime-dom.global.js"></script>
   <script src="../../reactivity//dist//reactivity.global.js"></script>
   <script>
-    const { createApp, h, reactive } = VueRuntimeDOM;
+    const { createApp, h, reactive, onMounted } = VueRuntimeDOM;
+    console.log("VueRuntimeDOM", VueRuntimeDOM);
     let App = {
       setup(props, context) {
         console.log("example-setup", props, context);
@@ -22,15 +23,22 @@
         const fn = () => {
           state.name = "example++";
         };
-        return () => {
-          return h("div", { style: { color: "red" }, onclick: fn }, state.name);
+        onMounted(() => {
+          console.log("生命周期-mounted", context);
+        });
+        return {
+          state,
         };
+        // return (pr) => {
+        //   console.log("pr", pr);
+        //   return h("div", { style: { color: "red" }, onclick: fn }, state.name);
+        // };
       },
-      // render(proxy){
-      //   // console.log('example-render',proxy,this);
-      //   // return  h('div',{style:{color:'red'}},'hello world')
-      //   return h('div',{style:{color:'red'}}, proxy.state.name)
-      // }
+      render(proxy) {
+        // console.log('example-render',proxy,this);
+        // return  h('div',{style:{color:'red'}},'hello world')
+        return h("div", { style: { color: "red" } }, proxy.state.name);
+      },
     };
     createApp(App, { name: "document", age: 0001 }).mount("#app");
   </script>

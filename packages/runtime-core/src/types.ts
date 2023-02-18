@@ -59,8 +59,21 @@ export interface IComponentInstance {
   emit?: () => void;
   expose?: () => void;
   render?: (ctx: any) => IVnode;
+  bm?: THook;
+  m?: THook;
+  bu?: THook;
+  u?: THook;
 }
 
 export type TPatchN = null | IVnode;
 
 export type TElementProps = Record<string, any>;
+
+export const enum lifeCycle {
+  BEFORE_MOUNT = "bm",
+  MOUNTED = "m",
+  BEFORE_UPDATE = "bu",
+  UPDATED = "u",
+}
+
+export type THook = (() => void)[];

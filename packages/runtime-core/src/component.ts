@@ -1,7 +1,17 @@
 import { isFunction, isObject, ShapeFlags } from "@vue/shared";
 import { IVnode, IComponentInstance } from "./types";
 import { componentPublicInstance } from "./componentPublicInstance";
-import { idText } from "typescript";
+import { invokerArray } from "./lifecycle";
+
+export let currentInstance: null | IComponentInstance = null;
+
+export function getCurrentInstance(): IComponentInstance {
+  return currentInstance as IComponentInstance;
+}
+
+export function setCurrentInstance(instance: IComponentInstance | null): void {
+  currentInstance = instance;
+}
 
 /**
  * @description:  创建组件实例
@@ -52,11 +62,13 @@ function setupStateComponent(instance: IComponentInstance) {
   if (setup) {
     // 处理setup 参数   setup  返回值两种情况  1.对象 合并到组件实例state  2.函数 =》render
     let setupContext = createContext(instance);
+
+    // 创建全局的instance
+    currentInstance = instance;
     let setupResult = setup(instance.props, setupContext);
+    currentInstance = null;
     handleSetupResult(instance, setupResult);
     componentRender(instance);
-  } else {
-    //   返回值是render函数的参数 调用render
   }
 }
 

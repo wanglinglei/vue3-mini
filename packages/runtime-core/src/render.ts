@@ -12,6 +12,7 @@ import { createAppApi } from "./apiCreateApp";
 
 import { createComponentInstance, setupComponent } from "./component";
 import { CVnode, TEXT, isSameNode } from "./vnode";
+import { invokerArray } from "./lifecycle";
 /**
  * @description: 创建渲染方法
  * @param {IRenderOptionDOM} renderOptionDOM
@@ -30,9 +31,10 @@ export function createRender(renderOptionDOM: IRenderOptionDOM) {
   } = renderOptionDOM;
   /**
    * @description: 核心渲染方法 比对新老节点
-   * @param {*} n1 老节点 初始化阶段wei null
-   * @param {*} n2 新节点
-   * @param {*} container  节点挂载的容器
+   * @param {TPatchN} n1 老节点 初始化阶段wei null
+   * @param {TPatchN} n2 新节点
+   * @param {HTMLElement} container  节点挂载的容器
+   * @param {HTMLElement} anchor 锚点
    * @return {*}
    */
   const patch = (
@@ -42,19 +44,12 @@ export function createRender(renderOptionDOM: IRenderOptionDOM) {
     anchor: HTMLElement | null = null
   ) => {
     // 判断是否是同一个元素 1:不是替换  2. 是 比对属性 子节点等
-    console.log("isSameNode", n1 && !isSameNode(n1, n2), n1, n2);
-
     if (n1 && !isSameNode(n1, n2)) {
       unmount(n1);
       n1 = null;
     }
     if (n2 === null) return;
     let { shapeFlag, type } = n2;
-    console.log(
-      "patch",
-      shapeFlag & ShapeFlags.ELEMENT,
-      shapeFlag & ShapeFlags.STATEFUL_COMPONENT
-    );
     switch (type) {
       case TEXT:
         processText(n1, n2, container);
@@ -207,11 +202,48 @@ export function createRender(renderOptionDOM: IRenderOptionDOM) {
       // 对比新旧 分别 找到可以复用的节点  新增的节点  删除的节点
       const s1 = i,
         s2 = i;
+      // 中间乱序的元素的元素个数
+      const toBePatched = len2 - s2 + 1;
+      // 用数组记录新元素的位置
+      const indexToBePatched = new Array(toBePatched).fill(0);
 
       let keyIndexMap = new Map();
       for (let i = s2; i <= len2; i++) {
         const childNode = c2[i];
-        keyIndexMap.set(childNode["key"], childNode);
+        keyIndexMap.set(childNode["key"], i);
+      }
+
+      // 遍历旧节点
+
+      for (let i = s1; i <= len1; i++) {
+        const oldNode = c1[i];
+        let newIndex = keyIndexMap.get(oldNode.key);
+        if (newIndex === undefined) {
+          // 旧的数据在新的数据中没有 删除
+          unmount(oldNode);
+        } else {
+          //新的元素在旧的列表中的位置+1
+          indexToBePatched[newIndex - s2] = i + 1;
+          // 比对 更新
+          patch(oldNode, c2[newIndex], el);
+        }
+      }
+
+      // 把节点移动到对应位置 添加新节点
+      for (let i = toBePatched - 1; i >= 0; i--) {
+        // 新增元素的索引
+        let currentIndex = i + s2;
+        let child = c2[currentIndex];
+        // 新增节点的位置 超出最大长度 追加到最后
+        let anchor =
+          currentIndex + 1 < c2.length ? c2[currentIndex + 1].el : null;
+        // 新增的元素 为第一次渲染
+        if (indexToBePatched[i] === 0) {
+          patch(null, child, el, anchor);
+        } else {
+          // 不为新增节点 可复用
+          insert(child.el, el, anchor);
+        }
       }
     }
   };
@@ -357,6 +389,12 @@ export function createRender(renderOptionDOM: IRenderOptionDOM) {
     // 创建effect
     effect(function componentEffect() {
       if (!instance.isMounted) {
+        console.log("instance", instance);
+        //@ts-ignore
+        let { bm, m } = instance;
+        if (bm) {
+          invokerArray(bm);
+        }
         // 获取到render 返回值
         let proxy = instance.proxy;
 
@@ -367,8 +405,13 @@ export function createRender(renderOptionDOM: IRenderOptionDOM) {
           proxy
         ));
         patch(null, subTree, container);
+        if (m) {
+          invokerArray(m); // 调度onMounted
+        }
         instance.isMounted = true;
       } else {
+        const { bu, u } = instance;
+        bu && invokerArray(bu); //beforeUpdate
         // 组件更新
         let proxy = instance.proxy;
         const preTree = instance.subTree;
@@ -377,6 +420,7 @@ export function createRender(renderOptionDOM: IRenderOptionDOM) {
           ? instance.render.call(proxy, proxy)
           : null;
         patch(preTree, nextTree, container);
+        u && invokerArray(u); // update
       }
     });
   };
